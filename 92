@@ -1,0 +1,203 @@
+#include <iostream>
+#include<filesystem>
+#include<fstream>
+#include<string>
+#include<cmath>
+#include<iomanip>
+
+using namespace std;
+
+double fun1(double x1, double x2,double x3) {
+    return x1 - 1 + sin(x2) + x3; // 1 0 0 
+}
+
+double fun2(double x1, double x2,double x3) {
+    return log10(x1) + cos(x2) - 1 + x3;
+}
+
+double fun3(double x1, double x2, double x3) {
+    return log10(x1) + x2 - 1 + cos(x3);
+}
+
+double stef(double y1, double y2,double eps1,double sh,double m,int p, double (*func)(double,double,double)) {
+	double a = 0, b, c, h, x, y;
+	int f = 0;
+	b = 10;
+	while (f==0) {
+		if (p == 1)
+			while (a < b) {
+				if (func(a, y1, y2) == 0) {
+					//cout << fixed << setprecision(m);
+					//cout << a << endl;
+					return a;
+					f = 1;
+				}
+				if (func(a, y1, y2) * func(a + sh, y1, y2) < 0) {
+					//cout << endl;
+					//cout << endl;
+					x = a + sh;
+					y = x - pow(func(x, y1, y2), 2) / (func(x + func(x, y1, y2), y1, y2) - func(x, y1, y2));
+					//cout << x << endl;
+					//cout << y;
+					while (abs(y - x) > eps1) {
+						x = y;
+						y = x - pow(func(x, y1, y2), 2) / (func(x + func(x, y1, y2), y1, y2) - func(x, y1, y2));
+						//cout << endl;
+						//cout << fixed << setprecision(m);
+						//cout << y;
+					}
+					return y;
+					f = 1;
+				}
+				if (func(a + sh, y1, y2) == 0) {
+					//cout << fixed << setprecision(m);
+					//cout << a + sh << endl;
+					return a + sh;
+					f = 1;
+				}
+				a = a + sh;
+			}
+		else
+			if (p == 2)
+				while (a < b) {
+					if (func(y1, a, y2) == 0) {
+						//cout << fixed << setprecision(m);
+						//cout << a << endl;
+						return a;
+						f = 1;
+					}
+					if (func(y1, a, y2) * func(y1, a+sh, y2) < 0) {
+						//cout << endl;
+						//cout << endl;
+						x = a + sh;
+						y = x - pow(func(y1, x, y2), 2) / (func(y1, x + func(y1, x, y2), y2) - func(y1, x, y2));
+						//cout << x << endl;
+						//cout << y;
+						while (abs(y - x) > eps1) {
+							x = y;
+							y = x - pow(func(y1, x, y2), 2) / (func(y1, x + func(y1, x, y2), y2) - func(y1, x, y2));
+							//cout << endl;
+							//cout << fixed << setprecision(m);
+							//cout << y;
+						}
+						return y;
+						f = 1;
+					}
+					if (func(y1, a + sh, y2) == 0) {
+						//cout << fixed << setprecision(m);
+						//cout << a + sh << endl;
+						return a + sh;
+						f = 1;
+					}
+					a = a + sh;
+				}
+			else
+				if (p==3) 
+					while (a < b) {
+						if (func(y1, y2, a) == 0) {
+							//cout << fixed << setprecision(m);
+							//cout << a << endl;
+							return a;
+							f = 1;
+						}
+						if (func(y1, y2, a) * func(y1, y2, a+sh) < 0) {
+							//cout << endl;
+							//cout << endl;
+							x = a + sh;
+							y = x - pow(func(y1, y2, x), 2) / (func(y1, y2, x + func(y1, y2, x)) - func(y1, y2, x));
+							//cout << x << endl;
+							//cout << y;
+							while (abs(y - x) > eps1) {
+								x = y;
+								y = x - pow(func(y1, y2, x), 2) / (func(y1, y2, x + func(y1, y2, x)) - func(y1, y2, x));
+								//cout << endl;
+								//cout << fixed << setprecision(m);
+								//cout << y;
+							}
+							return y;
+							f = 1;
+						}
+						if (func(y1, y2, a + sh) == 0) {
+							//cout << fixed << setprecision(m);
+							//cout << a + sh << endl;
+							return a + sh;
+							f = 1;
+						}
+						a = a + sh;
+					}
+		a = a - 10;
+		b = b + 10;
+		if (b == 1000000)
+			break;
+	}
+	return b + 1;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+	double x1, x2, x3, eps, k, xm1, xm2, xm3, max, m, eps1, sh;
+    double (*funs[3])(double, double, double) = { fun1,fun2,fun3 };
+	double* rz = new double;
+    ifstream ifs("input.txt");
+    ofstream ofs("output.txt");
+    ifs >> x1;
+    ifs >> x2;
+    ifs >> x3;
+    ifs >> eps;
+	ifs >> eps1;
+	ifs >> sh;
+    ifs >> m;
+    cout << x1 << endl;
+    cout << x2 << endl;
+    cout << x3 << endl;
+    cout << eps << endl;
+	cout << eps1 << endl;
+	cout << sh << endl;
+	cout << m << endl;
+    k = 0;
+    cout << endl;
+    cout << k << endl;
+    cout << endl;
+    int f = 0;
+    while (f == 0) {
+		xm1 = stef(x2, x3, eps1, sh, m, 1, fun1);
+		xm2 = stef(xm1, x3, eps1, sh, m, 2, fun2);
+		xm3 = stef(xm1, xm2, eps1, sh, m, 3, fun3);
+		cout << fixed << setprecision(m);
+		cout << xm1 << endl;
+		cout << fixed << setprecision(m);
+		cout << xm2 << endl;
+		cout << fixed << setprecision(m);
+		cout << xm3 << endl;
+		cout << k << endl;
+		cout << endl;
+		if (xm1 == 1000001 || xm2 == 1000001 || xm3 == 1000001) {
+			cout << "Одно или более уравнений не имеют корней";
+			ofs << "Одно или более уравнений не имеют корней";
+			break;
+		}
+		rz[0] = abs(xm1 - x1);
+		rz[1] = abs(xm2 - x2);
+		rz[2] = abs(xm3 - x3);
+		max = rz[1];
+		for (int i = 0; i < 3; i++) 
+			if (rz[i] > max)
+				max = rz[i];
+		if (max <= eps)
+			f = 1;
+		else {
+			x1 = xm1;
+			x2 = xm2;
+			x3 = xm3;
+		}
+		k++;
+    }
+	if (xm1 != 1000001 || xm2 != 1000001 || xm3 != 1000001) {
+		cout << endl;
+		ofs << xm1 << endl;
+		ofs << xm2 << endl;
+		ofs << xm3 << endl;
+		ofs << k;
+	}
+}
